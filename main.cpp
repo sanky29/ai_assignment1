@@ -1,11 +1,13 @@
 #include<bits/stdc++.h>
 using namespace std;
+
+
 class environment{
 	//whole class will be public only
 	public:
-  		 
-		//int number of characters visited
-		int visited;
+		
+		//the max lenght of input
+		int max_lenght;
 		
 		//the no of characters
 		int v;
@@ -25,8 +27,8 @@ class environment{
 		//the current string
 		std::vector<std::vector<int> > current;
 		
-		//the value state as
-		int value;
+		//this stores the privious state
+		std::vector<std::vector<int> > previous;
 		
 		//the cost matrix
 		std::vector<std::vector<int> > cost;
@@ -45,7 +47,7 @@ class environment{
 			int comp = 0;
 			std::vector<int> best;
 			for (int j = 0; j < pos.size(); j++){
-				if (pos[j][1] + 1 < current.size()){
+				if (pos[j][1] + 1 < current.size() && current[pos[j][0]][pos[j][1] + 1] != v){
 					std::vector<int> action;
 					action.push_back(pos[j][0]);
 					action.push_back(pos[j][1]);
@@ -57,46 +59,65 @@ class environment{
 					int column = action[1];
 					int column_new = column + action[2]; 
 					for (int i = 0; i < k ; i++){
-						intial = intial + cost[current[row][column]][current[i][column]] + cost[current[row][column_new]][current[i][column_new]]; 
+						if (row != i){
+	
+						intial = intial + cost[current[row][column]][current[i][column]] + cost[current[row][column_new]][current[i][column_new]]; 	
 						final = final + cost[current[row][column_new]][current[i][column]] + cost[current[row][column]][current[i][column_new]]; 
+						}
 					}
-					if (comp > final - intial){
-						comp = final - intial;
-						best = action;
+					if (comp >= final - intial){
+						int temp = current[action[0]][action[1]];
+						std::vector<vector<int> > temp2;
+						temp2 = current;
+						temp2[action[0]][action[1]] = current[action[0]][action[1]+action[2]];
+						temp2[action[0]][action[1]+ action[2]] = temp;
+						if (temp2 != previous){
+							comp = final - intial;
+							best = action;
+						}
 					}
+					
 				}
-				if (pos[j][1] - 1 >= 0){
+				else if (pos[j][1] - 1 >= 0 && current[pos[j][0]][pos[j][1] - 1] != v){
+					
 					std::vector<int> action;
 					action.push_back(pos[j][0]);
 					action.push_back(pos[j][1]);
 					action.push_back(-1);
+					action.push_back(j);
 					int intial = 0;
 					int final = 0;
 					int row = action[0];
 					int column = action[1];
-					int column_new = column + action[2]; 
-					for (int i = 0; i < k ; i++){
-						intial = intial + cost[current[row][column]][current[i][column]] + cost[current[row][column_new]][current[i][column_new]]; 
-						final = final + cost[current[row][column_new]][current[i][column]] + cost[current[row][column]][current[i][column_new]]; 
+					int column_new = column + action[2];
+					for (int i = 0; i < k ; i++){	
+						
+						if (row != i){
+							
+							intial = intial + cost[current[row][column]][current[i][column]] + cost[current[row][column_new]][current[i][column_new]]; 
+							final = final + cost[current[row][column_new]][current[i][column]] + cost[current[row][column]][current[i][column_new]];
+						}
 					}
-					if (comp > final - intial){
-						comp = final - intial;
-						best = action;
+					
+					if (comp >= final - intial){
+						
+						int temp = current[action[0]][action[1]];
+						std::vector<vector<int> > temp2;
+						temp2 = current;
+						temp2[action[0]][action[1]] = temp2[action[0]][action[1]+action[2]];
+						temp2[action[0]][action[1]+ action[2]] = temp;
+						if (temp2 != previous){
+							comp = final - intial;
+							best = action;
+						}
 					}
-				}
-			}
-			if (comp == 0){
-				std::vector<int> x;
-				x.push_back(-1);
-				return(x);
-			}
-			else{
-				return(best);
 			}
 		}
-		
+		return(best);
+	}
 		//int take the action action 
-		int take_action(std::vector<int> action){
+		void take_action(std::vector<int> action){
+			previous = current;
 			int temp = current[action[0]][action[1]];
 			current[action[0]][action[1]] = current[action[0]][action[1]+action[2]];
 			current[action[0]][action[1]+ action[2]] = temp;
@@ -110,8 +131,23 @@ class environment{
 				cout << endl;
 			}
 		}
+		
+	void random(int l){
+		current = input;
+		std::vector<vector <int> >pos1; 
+		for (int i = 0; i < k ; i++){
+			for (int j = 0; j < l - input[i].size() ; j++){
+				int z = rand() %(current[i].size());
+				std::vector<int> temp;
+				temp.push_back(i);
+				temp.push_back(z);
+				current[i].insert(current[i].begin() + z, v);
+				pos1.push_back(temp);
+			}
+		}
+		pos = pos1;
+	}		
 };
-
 
 int main(int argc, char **argv){
 	string inp = argv[1];
@@ -132,7 +168,7 @@ int main(int argc, char **argv){
 	{
 		inFile>>chars;
 		Vs.push_back(chars[0]);
-		cout<<"chars are "<<chars[0]<<endl;
+	
 		i++;
 	}
 	inFile >> K;
@@ -179,39 +215,23 @@ int main(int argc, char **argv){
 	}
 
 	inFile.close();
-	//---------------------------------------------------------------------------------------------------------------		
-	e.current.assign(2, std::vector<int>());
-	int z[] = {0,1,2};
-	e.current[0].assign(z,z+3);
-	z[0] = 1;
-	z[1] = 2;
-	z[2] = 3;
-	e.current[1].assign(z,z+3);
-	e.pos.assign(1,std::vector<int>());
-	e.pos[0].push_back(1);
-	e.pos[0].push_back(2);
-	e.cost.assign(4, std::vector < int >());
-	int x[] = {0,2,2,1};
-	e.cost[0].assign(x,x+4);
-	x[0] = 2;
-	x[1] = 0;
-	x[2] = 2;
-	x[3] = 1;
-	e.cost[1].assign(x,x+4);
-	x[0] = 2;
-	x[1] = 2;
-	x[2] = 0;
-	x[3] = 1;
-	e.cost[2].assign(x,x+4);
-	x[0] = 1;
-	x[1] = 1;
-	x[2] = 1;
-	x[3] = 1;
-	e.cost[3].assign(x,x+4);
-	e.render();
-	cout << " the solution is"<<endl;
-	e.take_action(e.choose_action());
-	e.take_action(e.choose_action());
-	e.render();
+	cout << "the new state is   "<<endl;
+	e.random(8);
+	cout << "the local search begins !!!!"<<endl;
+	for (int i = 0 ; i < 100 ; i ++){
+		std::vector<int> temp = e.choose_action();
+		if (temp.begin() == temp.end()){
+			cout<< "we have reached the local mimimum "<<endl;
+			e.render();
+			cout <<  "----------------------------------------------------------------"<<endl << endl;
+			e.random(8);
+			cout << "the new state is "<<endl;
+			e.render();
+			cout <<  "----------------------------------------------------------------"<<endl << endl;
+		}
+		else{
+			e.take_action(temp);
+		}
+	}
 }
 
