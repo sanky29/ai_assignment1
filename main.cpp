@@ -116,60 +116,69 @@ class environment{
 int main(int argc, char **argv){
 	string inp = argv[1];
 	string out = argv[2];
-    	int time, V, K, CC, h;
-	string chars, Kelem;
-    	ifstream inFile;
+    int time, V, K, CC, h;
+	string chars, Kelem, chars2;
+    ifstream inFile;
     
     inFile.open(inp);
     
     inFile >> time;
 	inFile >> V;
-	inFile >> chars;
-	inFile >> K;
-    environment e(V,K);
+
     
-	std::vector<string> Ks;
-	int i=0;
-	while(i<chars.length()) //read number, ignore comma, repeat
+	std::vector<char> Vs;
+	int i=0, count=0;
+	while(i<V) //read number, ignore comma, repeat
 	{
-    	if(chars[i]!=',' && chars[i]!=' '){
-			e.poschar.push_back(chars[i]);
-		}
+		inFile>>chars;
+		Vs.push_back(chars[0]);
+		cout<<"chars are "<<chars[0]<<endl;
 		i++;
 	}
-	int val;
-	for(int j=0; j<K; j++){
+	inFile >> K;
+    environment e(V,K);
+	i=0;
+	while(i<V){
+		e.poschar.push_back(Vs[i]);
+		i++;
+	}
+	int val, j=0;
+	e.input.assign(K, std::vector<int>());
+	while(j<K){
 		inFile >> Kelem;
 		i=0;
+		
 		while(i<Kelem.length()){
 			h=0;
 			while(h<V){
 				if(Kelem[i]==e.poschar[h]){
 					break;	
 				}
+				h++;
 			}
-			e.input[j][i] = h;
+			e.input[j].push_back(h);
+			i++;	
 		}
+		j++;
 	}
 
 	inFile >> CC;	
-	
+	e.cost.assign(V+1, std::vector<int>());
 	for(int j=0; j<V+1; j++){
-		inFile>>Kelem;
+		
 		i=0;
-		h=0;
-		while(i<Kelem.length()) //read number, ignore comma, repeat
+		while(i<V+1) //read number, ignore comma, repeat
 		{
-    		if(Kelem[i]!=' '){
-				e.cost[j][h] = int(Kelem[i]);
-				h++;
-			}
+    		inFile>>Kelem;
+			stringstream conv(Kelem);
+			conv>>h;
+			e.cost[j].push_back(h);
+			
 			i++;
 		}
 	}
-	
-	inFile.close();
-//---------------------------------------------------------------------------------------------------------------		
+
+	inFile.close();//---------------------------------------------------------------------------------------------------------------		
 	e.current.assign(2, std::vector<int>());
 	int z[] = {0,1,2};
 	e.current[0].assign(z,z+3);
