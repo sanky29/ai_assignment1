@@ -1,11 +1,7 @@
-#include<iostream>
-#include<vector>
-//making class of environment to impliment the problem as ai serach problem
+#include<bits/stdc++.h>
 using namespace std;
-
-class environment {
- 
- 	//whole class will be public only
+class environment{
+	//whole class will be public only
 	public:
   		 
 		//int number of characters visited
@@ -17,20 +13,17 @@ class environment {
 		//the number of strings
 		int k;
 		
-		//maintain the max int
-		int max_lenght;
-		
 		//possible characters
 		std::vector<char> poschar;
 		
-		//current position
-		std::vector<int> pos;
+		//current position od dashes
+		std::vector<std::vector<int> > pos;
 		
 		//the given strings which are converted to 2D char array
 		std::vector<std::vector<int> > input;
 		
-		//the stack of actions
-		std::vector<std::vector<int> > output;
+		//the current string
+		std::vector<std::vector<int> > current;
 		
 		//the value state as
 		int value;
@@ -43,75 +36,116 @@ class environment {
 			k = k1;
 			v = v1;
 		}
-		int cost_action(){
-			int c[v+1][max_lenght];
-			std::vector< std::vector<int> > c1;
-			c1.assign(v+1, vector<int>());
-			for (int j = 0; j <= k; j ++){
-				for(int i = 0; i < max_lenght; i++){
-					c[j][i] = 0;
+		
+		
+		
+		//this function computes the cost from given start
+		//lets say you take action 
+		std::vector<int> choose_action(){
+			int comp = 0;
+			std::vector<int> best;
+			for (int j = 0; j < pos.size(); j++){
+				if (pos[j][1] + 1 < current.size()){
+					std::vector<int> action;
+					action.push_back(pos[j][0]);
+					action.push_back(pos[j][1]);
+					action.push_back(1);
+					action.push_back(j);
+					int intial = 0;
+					int final = 0;
+					int row = action[0];
+					int column = action[1];
+					int column_new = column + action[2]; 
+					for (int i = 0; i < k ; i++){
+						intial = intial + cost[current[row][column]][current[i][column]] + cost[current[row][column_new]][current[i][column_new]]; 
+						final = final + cost[current[row][column_new]][current[i][column]] + cost[current[row][column]][current[i][column_new]]; 
+					}
+					if (comp > final - intial){
+						comp = final - intial;
+						best = action;
+					}
 				}
-			}
-			for (int i = 0; i < k ; i++){
-				int l = 0;
-				std::vector<int>::iterator a;
-				for (std::vector<int>::iterator it = output[i].begin() ; it != output[i].end(); ++it){
-					
-					
-					c[*it][l] = c[*it][l] + 1;
-					l = l + 1;
-					
-					
-				}
-			
-			}
-			//now we have repeatance cost matrix just need to find cost
-			int ans = 0; 
-			for (int i = 0; i < max_lenght; i++){
-				for(int j = 0; j <= v ; j++){
-					for (int l = j; l <=v ; l++){
-						ans = ans + cost[j][l]*c[l][i]*c[j][i];
+				if (pos[j][1] - 1 >= 0){
+					std::vector<int> action;
+					action.push_back(pos[j][0]);
+					action.push_back(pos[j][1]);
+					action.push_back(-1);
+					int intial = 0;
+					int final = 0;
+					int row = action[0];
+					int column = action[1];
+					int column_new = column + action[2]; 
+					for (int i = 0; i < k ; i++){
+						intial = intial + cost[current[row][column]][current[i][column]] + cost[current[row][column_new]][current[i][column_new]]; 
+						final = final + cost[current[row][column_new]][current[i][column]] + cost[current[row][column]][current[i][column_new]]; 
+					}
+					if (comp > final - intial){
+						comp = final - intial;
+						best = action;
 					}
 				}
 			}
-			return(ans);
-		}	
+			if (comp == 0){
+				std::vector<int> x;
+				x.push_back(-1);
+				return(x);
+			}
+			else{
+				return(best);
+			}
+		}
+		
+		//int take the action action 
+		int take_action(std::vector<int> action){
+			int temp = current[action[0]][action[1]];
+			current[action[0]][action[1]] = current[action[0]][action[1]+action[2]];
+			current[action[0]][action[1]+ action[2]] = temp;
+			pos[action[3]][1] = pos[action[3]][1] + action[2];
+		}
+		void render(){
+			for (int i = 0; i < current.size() ; i ++){
+				for (int j = 0; j < current[0].size(); j++){
+					cout << current[i][j] << " ";
+				}
+				cout << endl;
+			}
+		}
 };
 
 int main(){
 	environment e(2,2);
-	std::vector<int> x;
-	e.output.push_back(x);
-	std::vector<int> y;
-	e.output.push_back(y);
-	e.output[0].push_back(0);
-	e.output[0].push_back(1);
-	e.output[1].push_back(1);
-	e.output[1].push_back(0);
-	int z[] = {0,2,1};
-	e.cost.assign(3, vector < int >());
-	e.cost[0].assign(z,z+3);
-	z[0] = 2;
-	z[1] = 0;
-	z[2] = 1;
-	e.cost[1].assign(z,z+3);
+	e.current.assign(2, std::vector<int>());
+	int z[] = {0,1,2};
+	e.current[0].assign(z,z+3);
 	z[0] = 1;
-	z[1] = 1;
-	z[2] = 1;
-	e.cost[2].assign(z,z+3);
-	e.max_lenght = 2;
-	int ans = e.cost_action();
-	cout << "this is a "<< ans;
-	/*std::vector<int> c1;
-	c1.assign(3,1);
-	std::vector<int>::iterator i = c1.begin();
-	cout << c1[0] << endl;
-	i = i + 1;
-	cout << c1[1]<<endl;
-	i = i + 1;
-	i = i + 1;
-	cout << c1[2] << endl;
-	cout << (i == c1.end());*/
+	z[1] = 2;
+	z[2] = 3;
+	e.current[1].assign(z,z+3);
+	e.pos.assign(1,std::vector<int>());
+	e.pos[0].push_back(1);
+	e.pos[0].push_back(2);
+	e.cost.assign(4, std::vector < int >());
+	int x[] = {0,2,2,1};
+	e.cost[0].assign(x,x+4);
+	x[0] = 2;
+	x[1] = 0;
+	x[2] = 2;
+	x[3] = 1;
+	e.cost[1].assign(x,x+4);
+	x[0] = 2;
+	x[1] = 2;
+	x[2] = 0;
+	x[3] = 1;
+	e.cost[2].assign(x,x+4);
+	x[0] = 1;
+	x[1] = 1;
+	x[2] = 1;
+	x[3] = 1;
+	e.cost[3].assign(x,x+4);
+	e.render();
+	cout << " the solution is"<<endl;
+	e.take_action(e.choose_action());
+	e.take_action(e.choose_action());
+	e.render();
 }
-
 
