@@ -112,8 +112,64 @@ class environment{
 		}
 };
 
-int main(){
-	environment e(2,2);
+
+int main(int argc, char **argv){
+	string inp = argv[1];
+	string out = argv[2];
+    	int time, V, K, CC, h;
+	string chars, Kelem;
+    	ifstream inFile;
+    
+    inFile.open(inp);
+    
+    inFile >> time;
+	inFile >> V;
+	inFile >> chars;
+	inFile >> K;
+    environment e(V,K);
+    
+	std::vector<string> Ks;
+	int i=0;
+	while(i<chars.length()) //read number, ignore comma, repeat
+	{
+    	if(chars[i]!=',' && chars[i]!=' '){
+			e.poschar.push_back(chars[i]);
+		}
+		i++;
+	}
+	int val;
+	for(int j=0; j<K; j++){
+		inFile >> Kelem;
+		i=0;
+		while(i<Kelem.length()){
+			h=0;
+			while(h<V){
+				if(Kelem[i]==e.poschar[h]){
+					break;	
+				}
+			}
+			e.input[j][i] = h;
+		}
+	}
+
+	inFile >> CC;	
+	
+	for(int j=0; j<V+1; j++){
+		inFile>>Kelem;
+		i=0;
+		h=0;
+		while(i<Kelem.length()) //read number, ignore comma, repeat
+		{
+    		if(Kelem[i]!=' '){
+				e.cost[j][h] = int(Kelem[i]);
+				h++;
+			}
+			i++;
+		}
+	}
+	
+	inFile.close();
+//---------------------------------------------------------------------------------------------------------------		
 	e.current.assign(2, std::vector<int>());
 	int z[] = {0,1,2};
 	e.current[0].assign(z,z+3);
