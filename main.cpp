@@ -207,8 +207,8 @@ int main(int argc, char **argv){
 	time_t t;
 	t = time(NULL);
 	//input output file
-	//string inp = argv[1];
-	//string out = argv[2];
+	string inp = argv[1];
+	string out = argv[2];
 	
 	//reading file
     int tm, V, K, CC, h;
@@ -216,7 +216,7 @@ int main(int argc, char **argv){
     ifstream inFile;
     
     
-    inFile.open("input.txt");
+    inFile.open(inp);
     
     inFile >> tm;
 	inFile >> V;
@@ -347,8 +347,16 @@ int main(int argc, char **argv){
 		}
 	}
 	e.current = e.best_state;
-	cout << e.cost_state() <<" "<<endl;
-	e.render();
 
+	ofstream outdata; // outdata is like cin
+	e.poschar.push_back('-');
+	outdata.open(out); // opens the file
+	for (int i = 0; i < e.current.size() ; i ++){
+				for (int j = 0; j < e.current[0].size(); j++){
+					outdata << e.poschar[e.current[i][j]];
+				}
+				outdata << endl;
+		}
+	outdata.close();
 }
 
