@@ -296,7 +296,7 @@ int main(int argc, char **argv){
 		
 		//now work on iterations
 		
-		for (int j = 0; j < 1000; j++){
+		for (int j = 0; j < 10000; j++){
 			//choosing action
 			std::vector<int> temp = e.choose_action();
 			
@@ -322,7 +322,6 @@ int main(int argc, char **argv){
 		}
 	}
 	e.random(e.best_length);
-	
 	tm = tm - 3;
 	while(time(NULL) - t < tm){
 		//choosing action
@@ -347,6 +346,7 @@ int main(int argc, char **argv){
 			e.take_action(temp);
 		}
 	}
+	e.current = e.best_state;
 	cout << e.cost_state() <<" "<<endl;
 	e.render();
 
