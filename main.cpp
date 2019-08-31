@@ -215,13 +215,12 @@ int main(int argc, char **argv){
 	string chars, Kelem, chars2;
     ifstream inFile;
     
-    tm = tm*60;
     
     inFile.open("input.txt");
     
     inFile >> tm;
 	inFile >> V;
-	
+	tm = tm*60;
     
 	std::vector<char> Vs;
 	int i=0, count=0;
@@ -264,7 +263,6 @@ int main(int argc, char **argv){
 	
 	e.cost.assign(V+1, std::vector<int>());
 	for(int j=0; j<V+1; j++){
-		
 		i=0;
 		while(i<V+1) //read number, ignore comma, repeat
 		{
@@ -274,7 +272,6 @@ int main(int argc, char **argv){
 			e.cost[j].push_back(h);
 			
 			i++;
-			cout << "i am here";
 		}
 	}
 
@@ -300,7 +297,6 @@ int main(int argc, char **argv){
 		//now work on iterations
 		
 		for (int j = 0; j < 1000; j++){
-			cout << j<< endl;
 			//choosing action
 			std::vector<int> temp = e.choose_action();
 			
@@ -330,7 +326,6 @@ int main(int argc, char **argv){
 	tm = tm - 3;
 	while(time(NULL) - t < tm){
 		//choosing action
-		cout << "i am here"<<endl;
 		std::vector<int> temp = e.choose_action();
 			
 		if (temp.begin() == temp.end()){
