@@ -1,4 +1,5 @@
 #include<bits/stdc++.h>
+#include<fstream>
 using namespace std;
 
 
@@ -12,8 +13,20 @@ class environment{
 		//the no of characters
 		int v;
 		
+		//the best cost till now
+		int best_cost;
+		
+		//the best state
+		std::vector< std::vector<int> > best_state;
+		
 		//the number of strings
 		int k;
+		
+		//the cost of dashes
+		int cc;
+		
+		//the best lenght
+		int best_lenght;
 		
 		//possible characters
 		std::vector<char> poschar;
@@ -37,6 +50,8 @@ class environment{
 		environment(int k1,int v1){
 			k = k1;
 			v = v1;
+			best_cost = INT_MAX;
+			max_lenght = 0;
 		}
 		
 		
@@ -44,9 +59,16 @@ class environment{
 		//this function computes the cost from given start
 		//lets say you take action 
 		std::vector<int> choose_action(){
+			//the comparative cost
 			int comp = 0;
+			
+			//the current best action
 			std::vector<int> best;
+			
+			//the loop on each dash
 			for (int j = 0; j < pos.size(); j++){
+				
+				//moving dash to right
 				if (pos[j][1] + 1 < current.size() && current[pos[j][0]][pos[j][1] + 1] != v){
 					std::vector<int> action;
 					action.push_back(pos[j][0]);
@@ -78,6 +100,7 @@ class environment{
 					}
 					
 				}
+				//checking dash movement to left
 				else if (pos[j][1] - 1 >= 0 && current[pos[j][0]][pos[j][1] - 1] != v){
 					
 					std::vector<int> action;
@@ -123,6 +146,8 @@ class environment{
 			current[action[0]][action[1]+ action[2]] = temp;
 			pos[action[3]][1] = pos[action[3]][1] + action[2];
 		}
+		
+		//shows current state of environment
 		void render(){
 			for (int i = 0; i < current.size() ; i ++){
 				for (int j = 0; j < current[0].size(); j++){
@@ -131,13 +156,14 @@ class environment{
 				cout << endl;
 			}
 		}
-		
+	
+	//taking random restart	
 	void random(int l){
 		current = input;
 		std::vector<vector <int> >pos1; 
 		for (int i = 0; i < k ; i++){
 			for (int j = 0; j < l - input[i].size() ; j++){
-				int z = rand() %(current[i].size());
+				int z = rand() %(current[i].size()) + 1;
 				std::vector<int> temp;
 				temp.push_back(i);
 				temp.push_back(z);
@@ -146,15 +172,50 @@ class environment{
 			}
 		}
 		pos = pos1;
+	}
+	
+	//function to compute cost
+	int cost_state(){
+		int repeat[v+1][max_lenght];
+		for (int i = 0 ; i < v+1 ; i++){
+			for(int j = 0; j < max_lenght; j++){
+				repeat[i][j] = 0;
+			}
+		}
+		for (int i = 0; i < max_lenght ; i++){
+			for (int j = 0; j < k; j++){
+				repeat[current[j][i]][i] = repeat[current[j][i]][i] + 1;
+			}
+		}
+		int ans = 0;
+		for(int j = 0; j < max_lenght; j++){
+			for(int i = 0; i <= v ; i ++){
+				for (int o = j + 1; o <= v ; o++){
+					ans = ans + cost[i][o]*repeat[i][j]*repeat[o][j];
+				}
+			}
+		}
+		ans  = ans + pos.size()*cc;
+		return(ans);
 	}		
 };
 
+//the main function
 int main(int argc, char **argv){
+	
+	//define time variable
+	time_t t;
+	t = time(NULL);
+	//input output file
 	string inp = argv[1];
 	string out = argv[2];
+	
+	//reading file
     int time, V, K, CC, h;
 	string chars, Kelem, chars2;
     ifstream inFile;
+    
+    time = time*60;
     
     inFile.open(inp);
     
@@ -172,7 +233,7 @@ int main(int argc, char **argv){
 		i++;
 	}
 	inFile >> K;
-    environment e(V,K);
+    environment e(K,V);
 	i=0;
 	while(i<V){
 		e.poschar.push_back(Vs[i]);
@@ -199,6 +260,8 @@ int main(int argc, char **argv){
 	}
 
 	inFile >> CC;	
+	
+	
 	e.cost.assign(V+1, std::vector<int>());
 	for(int j=0; j<V+1; j++){
 		
@@ -215,23 +278,77 @@ int main(int argc, char **argv){
 	}
 
 	inFile.close();
-	cout << "the new state is   "<<endl;
-	e.random(8);
-	cout << "the local search begins !!!!"<<endl;
-	for (int i = 0 ; i < 100 ; i ++){
-		std::vector<int> temp = e.choose_action();
-		if (temp.begin() == temp.end()){
-			cout<< "we have reached the local mimimum "<<endl;
-			e.render();
-			cout <<  "----------------------------------------------------------------"<<endl << endl;
-			e.random(8);
-			cout << "the new state is "<<endl;
-			e.render();
-			cout <<  "----------------------------------------------------------------"<<endl << endl;
-		}
-		else{
-			e.take_action(temp);
+	
+	//calculating max lenght
+	for (int i = 0 ; i < e.input.size(); i ++){
+		if (e.max_lenght < e.input[i].size()){
+			e.max_lenght = e.input[i].size();
 		}
 	}
+	
+	//assigning constant cost
+	e.cc = CC;
+	
+	//working on the l
+	//taking on average over all l
+	for (int i = 0 ; i <= 3 ; i ++){
+		
+		//intialize the state
+		e.random(e.max_lenght + 1);
+		
+		//now work on iterations
+		
+		for (int j = 0; j < 1000; j++){
+			
+			//choosing action
+			std::vector<int> temp = e.choose_action();
+			
+			if (temp.begin() == temp.end()){
+				
+				int x = e.cost_state();
+				
+				if (e.best_cost > x){
+					
+					e.best_state = e.current;
+					e.best_cost = x;
+					e.best_lenght = i + max_lenght;
+				}
+				
+				e.random(e.max_length + i);
+			
+			}
+		
+			else{
+				
+				e.take_action(temp);
+			}
+		}
+	}
+	e.random(e.best_length);
+	while(time(NULL) - t - time < 3){
+		//choosing action
+		std::vector<int> temp = e.choose_action();
+			
+		if (temp.begin() == temp.end()){
+							
+			int x = e.cost_state();
+				
+			if (e.best_cost > x){
+					
+				e.best_state = e.current;
+				e.best_cost = x;
+			}
+				
+			e.random(e.best_length);
+			
+		}
+		
+		else{
+				
+			e.take_action(temp);
+		}
+		
+	cout << e.cost <<" "<<endl;
+	e.render();
 }
 
