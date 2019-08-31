@@ -7,8 +7,8 @@ class environment{
 	//whole class will be public only
 	public:
 		
-		//the max lenght of input
-		int max_lenght;
+		//the max length of input
+		int max_length;
 		
 		//the no of characters
 		int v;
@@ -25,8 +25,8 @@ class environment{
 		//the cost of dashes
 		int cc;
 		
-		//the best lenght
-		int best_lenght;
+		//the best length
+		int best_length;
 		
 		//possible characters
 		std::vector<char> poschar;
@@ -51,7 +51,7 @@ class environment{
 			k = k1;
 			v = v1;
 			best_cost = INT_MAX;
-			max_lenght = 0;
+			max_length = 0;
 		}
 		
 		
@@ -176,19 +176,19 @@ class environment{
 	
 	//function to compute cost
 	int cost_state(){
-		int repeat[v+1][max_lenght];
+		int repeat[v+1][max_length];
 		for (int i = 0 ; i < v+1 ; i++){
-			for(int j = 0; j < max_lenght; j++){
+			for(int j = 0; j < max_length; j++){
 				repeat[i][j] = 0;
 			}
 		}
-		for (int i = 0; i < max_lenght ; i++){
+		for (int i = 0; i < max_length ; i++){
 			for (int j = 0; j < k; j++){
 				repeat[current[j][i]][i] = repeat[current[j][i]][i] + 1;
 			}
 		}
 		int ans = 0;
-		for(int j = 0; j < max_lenght; j++){
+		for(int j = 0; j < max_length; j++){
 			for(int i = 0; i <= v ; i ++){
 				for (int o = j + 1; o <= v ; o++){
 					ans = ans + cost[i][o]*repeat[i][j]*repeat[o][j];
@@ -201,27 +201,27 @@ class environment{
 };
 
 //the main function
-int main(int argc, char **argv){
+int main(int argc, char **argv){	
 	
 	//define time variable
 	time_t t;
 	t = time(NULL);
 	//input output file
-	string inp = argv[1];
-	string out = argv[2];
+	//string inp = argv[1];
+	//string out = argv[2];
 	
 	//reading file
-    int time, V, K, CC, h;
+    int tm, V, K, CC, h;
 	string chars, Kelem, chars2;
     ifstream inFile;
     
-    time = time*60;
+    tm = tm*60;
     
-    inFile.open(inp);
+    inFile.open("input.txt");
     
-    inFile >> time;
+    inFile >> tm;
 	inFile >> V;
-
+	
     
 	std::vector<char> Vs;
 	int i=0, count=0;
@@ -274,15 +274,16 @@ int main(int argc, char **argv){
 			e.cost[j].push_back(h);
 			
 			i++;
+			cout << "i am here";
 		}
 	}
 
 	inFile.close();
 	
-	//calculating max lenght
+	//calculating max length
 	for (int i = 0 ; i < e.input.size(); i ++){
-		if (e.max_lenght < e.input[i].size()){
-			e.max_lenght = e.input[i].size();
+		if (e.max_length < e.input[i].size()){
+			e.max_length = e.input[i].size();
 		}
 	}
 	
@@ -294,12 +295,12 @@ int main(int argc, char **argv){
 	for (int i = 0 ; i <= 3 ; i ++){
 		
 		//intialize the state
-		e.random(e.max_lenght + 1);
+		e.random(e.max_length + i);
 		
 		//now work on iterations
 		
 		for (int j = 0; j < 1000; j++){
-			
+			cout << j<< endl;
 			//choosing action
 			std::vector<int> temp = e.choose_action();
 			
@@ -311,7 +312,7 @@ int main(int argc, char **argv){
 					
 					e.best_state = e.current;
 					e.best_cost = x;
-					e.best_lenght = i + max_lenght;
+					e.best_length = i + e.max_length;
 				}
 				
 				e.random(e.max_length + i);
@@ -325,8 +326,11 @@ int main(int argc, char **argv){
 		}
 	}
 	e.random(e.best_length);
-	while(time(NULL) - t - time < 3){
+	
+	tm = tm - 3;
+	while(time(NULL) - t < tm){
 		//choosing action
+		cout << "i am here"<<endl;
 		std::vector<int> temp = e.choose_action();
 			
 		if (temp.begin() == temp.end()){
@@ -347,8 +351,9 @@ int main(int argc, char **argv){
 				
 			e.take_action(temp);
 		}
-		
-	cout << e.cost <<" "<<endl;
+	}
+	cout << e.cost_state() <<" "<<endl;
 	e.render();
+
 }
 
